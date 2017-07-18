@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.pkhapps.nlsmap</groupId>
+    <artifactId>nlsmap</artifactId>
+    <version>2017.6-SNAPSHOT</version>
+    <modules>
+        <module>nlsmap-api</module>
+        <module>nlsmap-importer</module>
+        <module>nlsmap-jdbc</module>
+        <module>nlsmap-rest</module>
+        <module>nlsmap-ui</module>
+    </modules>
+    <packaging>pom</packaging>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jackson.version>2.9.0.pr3</jackson.version>
+        <junit.version>4.12</junit.version>
+        <assertj.version>3.8.0</assertj.version>
+        <geotools.version>17.1</geotools.version>
+        <slf4j.version>1.7.25</slf4j.version>
+        <logback.version>1.2.3</logback.version>
+        <h2gis.version>1.3.1</h2gis.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/junit/junit -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.geotools/gt-main -->
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-main</artifactId>
+                <version>${geotools.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.geotools/gt-image -->
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-image</artifactId>
+                <version>${geotools.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.geotools/gt-imagemosaic -->
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-imagemosaic</artifactId>
+                <version>${geotools.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.geotools/gt-imagemosaic-jdbc -->
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-imagemosaic-jdbc</artifactId>
+                <version>${geotools.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.geotools.jdbc/gt-jdbc-postgis -->
+            <dependency>
+                <groupId>org.geotools.jdbc</groupId>
+                <artifactId>gt-jdbc-postgis</artifactId>
+                <version>${geotools.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.geotools/gt-swing -->
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-swing</artifactId>
+                <version>${geotools.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.orbisgis/h2gis-functions -->
+            <dependency>
+                <groupId>org.orbisgis</groupId>
+                <artifactId>h2gis-functions</artifactId>
+                <version>${h2gis.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.orbisgis/h2gis-ext -->
+            <dependency>
+                <groupId>org.orbisgis</groupId>
+                <artifactId>h2gis-ext</artifactId>
+                <version>${h2gis.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>geotools</id>
+            <url>http://repo.boundlessgeo.com/main/</url>
+        </repository>
+    </repositories>
+</project>
