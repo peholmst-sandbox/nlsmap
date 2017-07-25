@@ -5,6 +5,7 @@ import net.pkhapps.nlsmap.api.raster.MapTileIdentifier;
 import net.pkhapps.nlsmap.api.raster.MapTileProvider;
 import net.pkhapps.nlsmap.ui.MockMapTileProvider;
 import org.geotools.geometry.DirectPosition2D;
+import org.geotools.geometry.Envelope2D;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.geometry.Envelope;
 
@@ -40,6 +41,9 @@ public class MapPanel extends JComponent {
 
         protected abstract Envelope toEnvelope(DirectPosition anchorPointPosition, Rectangle bounds, double scaleX,
                                                double scaleY);
+
+        protected abstract Point toPoint(DirectPosition anchorPointPosition, Rectangle bounds, double scaleX,
+                                         double scaleY, DirectPosition position);
     }
 
     /**
@@ -55,6 +59,8 @@ public class MapPanel extends JComponent {
             final double offsetX = point.getX() - centerX;
             final double offsetY = point.getY() - centerY;
             // TODO Take axises of CRS into account
+
+            // Here, we are translating from raster to map coordinates, so we use the scale values directly.
             final double coordinateX = anchorPointPosition.getOrdinate(0) + scaleX * offsetX;
             final double coordinateY = anchorPointPosition.getOrdinate(1) + scaleY * offsetY;
             return new DirectPosition2D(anchorPointPosition.getCoordinateReferenceSystem(), coordinateX, coordinateY);
@@ -73,9 +79,34 @@ public class MapPanel extends JComponent {
         }
 
         @Override
-        protected Envelope toEnvelope(DirectPosition anchorPointPosition, Rectangle bounds, double scaleX, double scaleY) {
-            // TODO Implement me!
-            throw new UnsupportedOperationException("Not implemented yet");
+        protected Envelope toEnvelope(DirectPosition anchorPointPosition, Rectangle bounds, double scaleX,
+                                      double scaleY) {
+            final double centerX = bounds.getWidth() / 2;
+            final double centerY = bounds.getHeight() / 2;
+
+            // We are not translating from raster to map coordinates, so we should use the absolute value of the scale.
+            // The Y scale is most likely negative since (0,0) in the raster plane is in the top-left corner whereas
+            // (0,0) on a map is in the bottom-left corner.
+
+            final double minX = anchorPointPosition.getOrdinate(0) - Math.abs(centerX * scaleX);
+            final double minY = anchorPointPosition.getOrdinate(1) - Math.abs(centerY * scaleY);
+
+            return new Envelope2D(anchorPointPosition.getCoordinateReferenceSystem(), minX, minY,
+                    Math.abs(bounds.getWidth() * scaleX), Math.abs(bounds.getHeight() * scaleY));
+        }
+
+        @Override
+        protected Point toPoint(DirectPosition anchorPointPosition, Rectangle bounds, double scaleX, double scaleY,
+                                DirectPosition position) {
+            final double centerX = bounds.getWidth() / 2;
+            final double centerY = bounds.getHeight() / 2;
+            // TODO Take axises of CRS into account
+            final double coordinateOffsetX = position.getOrdinate(0) - anchorPointPosition.getOrdinate(0);
+            final double coordinateOffsetY = position.getOrdinate(1) - anchorPointPosition.getOrdinate(1);
+            // Here, we are translating from map to raster coordinates, so we use the scale values directly.
+            final double x = centerX + coordinateOffsetX / scaleX;
+            final double y = centerY + coordinateOffsetY / scaleY;
+            return new Point((int) x, (int) y);
         }
 
         @Override
@@ -85,6 +116,8 @@ public class MapPanel extends JComponent {
     };
 
     // TODO Create additional anchor points
+
+    // TODO Prevent dragging the map off bounds
 
     private class MouseHandler implements MouseListener, MouseMotionListener {
 
@@ -122,8 +155,8 @@ public class MapPanel extends JComponent {
         public void mouseDragged(MouseEvent e) {
             final double offsetX = e.getX() - dragStartMousePosition.getX();
             final double offsetY = e.getY() - dragStartMousePosition.getY();
-            doSetAnchorPointPosition(anchorPoint.toDirectPosition(dragStartAnchorPointPosition, getBounds(), getScaleX(),
-                    getScaleY(), offsetX, offsetY), true);
+            doSetAnchorPointPosition(anchorPoint.toDirectPosition(dragStartAnchorPointPosition, getBounds(),
+                    getScaleX(), getScaleY(), offsetX, offsetY), true);
             repaint();
         }
 
@@ -153,21 +186,22 @@ public class MapPanel extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        // TODO Paint everything inside a separate buffer, then copy it over to the component buffer.
         if (mapTileProvider == null) {
             g.drawString("Please attach a MapTileProvider", 10, 20);
         } else {
-            g.drawString(getAnchorPointPosition().toString(), 10, 20);
-            //Optional<MapTileIdentifier> centerTile = mapTileProvider.getTileIdentifier(zoomLevel, centerCoordinates);
-            //centerTile.flatMap(mapTileProvider::getTile).ifPresent(tile -> {
-            // Calculate where to start painting the tile so that
-            //});
-            // TODO Continue here
+            g.setColor(Color.GRAY);
+            g.fillRect(0, 0, getBounds().width, getBounds().height);
+            mapTileProvider.getTileIdentifiers(zoomLevel, getEnvelope()).forEach(tileIdentifier ->
+                    drawTile(tileIdentifier, g));
         }
     }
 
-    private void drawTile(MapTileIdentifier identifier, Graphics g) {
-        System.out.println(identifier);
+    private void drawTile(MapTileIdentifier tileIdentifier, Graphics g) {
+        mapTileProvider.getTile(tileIdentifier).ifPresent(tile -> {
+            final Point bottomLeft = getAnchorPoint().toPoint(getAnchorPointPosition(), getBounds(), getScaleX(),
+                    getScaleY(), tile.getEnvelope().getLowerCorner());
+            tile.paint(g, bottomLeft.x, bottomLeft.y - tile.getHeight());
+        });
     }
 
     /**
@@ -223,8 +257,8 @@ public class MapPanel extends JComponent {
     /**
      * TODO Document me
      */
-    public MapTileProvider getMapTileProvider() {
-        return mapTileProvider;
+    public Optional<MapTileProvider> getMapTileProvider() {
+        return Optional.ofNullable(mapTileProvider);
     }
 
     /**
@@ -268,9 +302,10 @@ public class MapPanel extends JComponent {
             final JLabel statusBar = new JLabel();
             panel.setMapTileProvider(new MockMapTileProvider());
 
-            final Runnable updateStatusBar = () -> statusBar.setText(String.format("Mouse cursor coordinates: %s, anchor point coordinates: %s, anchor point: %s",
-                    panel.getMousePositionCoordinates().map(MapPanel::directPositionToString).orElse("(none)"),
-                    directPositionToString(panel.getAnchorPointPosition()), panel.getAnchorPoint()));
+            final Runnable updateStatusBar = () -> statusBar.setText(
+                    String.format("Mouse cursor coordinates: %s, anchor point coordinates: %s, anchor point: %s",
+                            panel.getMousePositionCoordinates().map(MapPanel::directPositionToString).orElse("(none)"),
+                            directPositionToString(panel.getAnchorPointPosition()), panel.getAnchorPoint()));
 
             panel.addPropertyChangeListener(evt -> updateStatusBar.run());
             panel.addMouseMotionListener(new MouseMotionAdapter() {

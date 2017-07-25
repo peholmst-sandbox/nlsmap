@@ -22,7 +22,7 @@ public interface MapTile {
      *
      * @return
      */
-    void paint(Object context, int offsetX, int offsetY);
+    void paint(Object context, int x, int y);
 
     /**
      * Returns the width of the tile in pixels.
