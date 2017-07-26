@@ -11,5 +11,33 @@
 
     <artifactId>nlsmap-jdbc</artifactId>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>net.pkhapps.nlsmap</groupId>
+            <artifactId>nlsmap-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <optional>true</optional>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.orbisgis</groupId>
+            <artifactId>h2gis-functions</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.orbisgis</groupId>
+            <artifactId>h2gis-ext</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+    </dependencies>
 </project>

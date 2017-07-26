@@ -54,7 +54,7 @@ public final class TileUtils {
             }
 
             final Envelope2D envelope = coverage.getEnvelope2D();
-            final double upperLeftX = envelope.getMaxX();
+            final double upperLeftX = envelope.getMinX();
             final double upperLeftY = envelope.getMaxY();
             final double scaleX = envelope.getWidth() / width;
             final double scaleY = -envelope.getHeight() / height;
@@ -62,7 +62,8 @@ public final class TileUtils {
             final int cols = width / tileWidth;
             final int rows = height / tileHeight;
 
-            LOGGER.debug("Raster will be split up into {} tiles", cols * rows);
+            LOGGER.debug("Raster will be split up into {} tiles, scale X is {} and scale Y is {}", cols * rows, scaleX,
+                    scaleY);
 
             final Raster raster = image.getData();
             // Process tiles

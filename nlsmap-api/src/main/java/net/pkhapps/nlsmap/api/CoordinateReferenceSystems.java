@@ -9,6 +9,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
  */
 public final class CoordinateReferenceSystems {
 
+    public static final int ETRS89_TM35FIN_SRID = 3067;
+    public static final int WGS84_SRID = 4326;
     public static final CoordinateReferenceSystem ETRS89_TM35FIN;
     public static final CoordinateReferenceSystem WGS84;
 

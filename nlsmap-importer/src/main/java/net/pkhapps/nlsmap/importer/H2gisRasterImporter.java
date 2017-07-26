@@ -1,12 +1,16 @@
 package net.pkhapps.nlsmap.importer;
 
+import net.pkhapps.nlsmap.api.CoordinateReferenceSystems;
+import net.pkhapps.nlsmap.jdbc.raster.H2gisZoomLevel;
 import org.geotools.geometry.Envelope2D;
-import org.opengis.geometry.Envelope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -23,6 +27,7 @@ import java.util.Properties;
  */
 public class H2gisRasterImporter {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(H2gisRasterImporter.class);
     private final Connection connection;
 
     private static final String CONTENT_TYPE_PNG = "image/png";
@@ -31,56 +36,67 @@ public class H2gisRasterImporter {
         this.connection = connection;
     }
 
-    public void importRasterFiles(File directory, String tableName, int tileWidth, int tileHeight, int srid) throws Exception {
-        try (Worker worker = new Worker(tableName, srid)) {
+    public void importRasterFiles(File directory, H2gisZoomLevel zoomLevel, int srid) throws Exception {
+        LOGGER.info("Importing raster files from directory [{}] using zoom level [{}]", directory, zoomLevel);
+        try (Worker worker = new Worker(zoomLevel.getTableName(), srid)) {
             // TODO Skip tiles that have already been imported based on the timestamp
-            DirectoryVisitor.visit(directory, "*.png", png -> TileUtils.createTiles(png, tileWidth, tileHeight, worker::storeTile));
+            // TODO Verify scales and tile sizes of ZoomLevel with the ones coming from the files
+            DirectoryVisitor.visit(directory, "*.png", png -> TileUtils.createTiles(png, zoomLevel.getTileWidth(),
+                    zoomLevel.getTileHeight(), worker::storeTile));
         }
     }
 
     private class Worker implements AutoCloseable {
-        private final String tableName;
         private final int srid;
         private PreparedStatement insertTile;
-
-        private static final int INSERT_TILE_SOURCE = 1;
-        private static final int INSERT_TILE_X = 2;
-        private static final int INSERT_TILE_Y = 3;
-        private static final int INSERT_TILE_UPDATED = 4;
-        private static final int INSERT_TILE_X_MIN = 5;
-        private static final int INSERT_TILE_Y_MIN = 6;
-        private static final int INSERT_TILE_X_MAX = 7;
-        private static final int INSERT_TILE_Y_MAX = 8;
-        private static final int INSERT_TILE_SRID = 9;
-        private static final int INSERT_TILE_IMAGE = 10;
-        private static final int INSERT_TILE_IMAGE_TYPE = 11;
+        private int batchQueueCount = 0;
 
         public Worker(String tableName, int srid) throws Exception {
-            this.tableName = tableName;
             this.srid = srid;
-            insertTile = connection.prepareStatement("INSERT INTO " + tableName + " (source, tile_x, tile_y, last_updated, geom, image, image_type) VALUES (?, ?, ?, ?, ST_MakeEnvelope(?, ?, ?, ?, ?), ?, ?)");
+            insertTile = connection.prepareStatement("INSERT INTO " + tableName + " (id, map_sheet, " +
+                    "last_updated, geom, min_x, min_y, max_x, max_y, srid, image, image_type) " +
+                    "VALUES (?, ?, ?, ST_MakeEnvelope(?, ?, ?, ?, ?), ?, ?, ?, ?, ?, ?, ?)");
         }
 
-        private void storeTile(String name, int x, int y, Raster tile, ColorModel colorModel, Envelope2D envelope) throws IOException {
+        private void storeTile(String name, int x, int y, Raster tile, ColorModel colorModel, Envelope2D envelope)
+                throws IOException {
             try {
-                BufferedImage img = new BufferedImage(colorModel, tile.createCompatibleWritableRaster(),
+                WritableRaster writableRaster = tile.createCompatibleWritableRaster();
+                writableRaster.setDataElements(0, 0, tile);
+                BufferedImage img = new BufferedImage(colorModel, writableRaster,
                         colorModel.isAlphaPremultiplied(), null);
                 // ByteArray streams do not need to be closed
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 ImageIO.write(img, "png", bos);
-                insertTile.setString(INSERT_TILE_SOURCE, name);
-                insertTile.setInt(INSERT_TILE_X, x);
-                insertTile.setInt(INSERT_TILE_Y, y);
-                insertTile.setTimestamp(INSERT_TILE_UPDATED, Timestamp.from(Instant.now()));
-                insertTile.setDouble(INSERT_TILE_X_MIN, envelope.getMinX());
-                insertTile.setDouble(INSERT_TILE_Y_MIN, envelope.getMinY());
-                insertTile.setDouble(INSERT_TILE_X_MAX, envelope.getMaxX());
-                insertTile.setDouble(INSERT_TILE_Y_MAX, envelope.getMaxY());
-                insertTile.setInt(INSERT_TILE_SRID, srid);
-                insertTile.setBlob(INSERT_TILE_IMAGE, new ByteArrayInputStream(bos.toByteArray()));
-                insertTile.setString(INSERT_TILE_IMAGE_TYPE, CONTENT_TYPE_PNG);
-                System.out.println(envelope);
-                //insertTile.execute(); // TODO Change to batch
+                int parameterIx = 1;
+                insertTile.setString(parameterIx++, String.format("%s:%d:%d", name, x, y));
+                insertTile.setString(parameterIx++, name);
+                insertTile.setTimestamp(parameterIx++, Timestamp.from(Instant.now()));
+                {
+                    // Geom
+                    insertTile.setDouble(parameterIx++, envelope.getMinX());
+                    insertTile.setDouble(parameterIx++, envelope.getMinY());
+                    insertTile.setDouble(parameterIx++, envelope.getMaxX());
+                    insertTile.setDouble(parameterIx++, envelope.getMaxY());
+                    insertTile.setInt(parameterIx++, srid);
+                }
+                {
+                    // Ordinary columns
+                    insertTile.setDouble(parameterIx++, envelope.getMinX());
+                    insertTile.setDouble(parameterIx++, envelope.getMinY());
+                    insertTile.setDouble(parameterIx++, envelope.getMaxX());
+                    insertTile.setDouble(parameterIx++, envelope.getMaxY());
+                    insertTile.setInt(parameterIx++, srid);
+                }
+                insertTile.setBlob(parameterIx++, new ByteArrayInputStream(bos.toByteArray()));
+                insertTile.setString(parameterIx, CONTENT_TYPE_PNG);
+                insertTile.addBatch();
+                batchQueueCount++;
+
+                if (batchQueueCount >= 100) {
+                    insertTile.executeBatch();
+                    batchQueueCount = 0;
+                }
             } catch (Exception ex) {
                 throw new IOException(String.format("Error storing tile %s(%d, %d)", name, x, y), ex);
             }
@@ -88,6 +104,9 @@ public class H2gisRasterImporter {
 
         @Override
         public void close() throws Exception {
+            if (batchQueueCount > 0) {
+                insertTile.executeBatch();
+            }
             insertTile.close();
         }
     }
@@ -107,8 +126,27 @@ public class H2gisRasterImporter {
         try (Connection conn = DriverManager.getConnection(url, props)) {
             H2gisDatabaseInitializer.initialize(conn);
             H2gisRasterImporter importer = new H2gisRasterImporter(conn);
-            importer.importRasterFiles(new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_5000"),
-                    "bg_raster_1_5000", 200, 200, 3067); // ETRS89 / TM35FIN
+            importer.importRasterFiles(
+                    new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_5000"),
+                    H2gisZoomLevel.ZL5000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
+            importer.importRasterFiles(
+                    new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_10000"),
+                    H2gisZoomLevel.ZL10000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
+            importer.importRasterFiles(
+                    new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_20000"),
+                    H2gisZoomLevel.ZL20000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
+            importer.importRasterFiles(
+                    new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_40000"),
+                    H2gisZoomLevel.ZL40000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
+            importer.importRasterFiles(
+                    new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_80000"),
+                    H2gisZoomLevel.ZL80000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
+            importer.importRasterFiles(
+                    new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_160000"),
+                    H2gisZoomLevel.ZL160000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
+            importer.importRasterFiles(
+                    new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_320000"),
+                    H2gisZoomLevel.ZL320000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
         }
     }
 }

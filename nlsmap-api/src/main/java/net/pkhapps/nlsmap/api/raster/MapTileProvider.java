@@ -8,6 +8,8 @@ import java.util.Optional;
 
 /**
  * TODO Document me!
+ *
+ * Can assume one provider per panel, to allow for optimization.
  */
 public interface MapTileProvider {
 

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * TODO Document me
+ * Mock implementation of {@link MapTileProvider} to be used for UI component testing.
  */
 public class MockMapTileProvider implements MapTileProvider {
 
@@ -63,7 +63,6 @@ public class MockMapTileProvider implements MapTileProvider {
     }
 
     private int getMaxY(int zoomLevel) {
-        // TODO Check that -1 is correct
         return (int) (BOUNDS.getHeight() / (TILE_HEIGHT_PX * -getScaleY(zoomLevel)));
     }
 
@@ -242,12 +241,16 @@ public class MockMapTileProvider implements MapTileProvider {
                 g.setColor(Color.BLUE);
                 LOGGER.debug("Painting tile {} at ({},{})", this, x, y);
                 g.drawRect(x, y, TILE_WIDTH_PX, TILE_HEIGHT_PX);
-                g.drawString(String.format("(%d,%d)", mapTileIdentifier.getX(), mapTileIdentifier.getY()), x + 10, y + 20);
-                g.drawString(String.format("LX: %.2f", getEnvelope().getLowerCorner().getOrdinate(0)), x + 10, y + 40);
-                g.drawString(String.format("LY: %.2f", getEnvelope().getLowerCorner().getOrdinate(1)), x + 10, y + 50);
-
-                g.drawString(String.format("UX: %.2f", getEnvelope().getUpperCorner().getOrdinate(0)), x + 10, y + 70);
-                g.drawString(String.format("UY: %.2f", getEnvelope().getUpperCorner().getOrdinate(1)), x + 10, y + 80);
+                g.drawString(String.format("(%d,%d)", mapTileIdentifier.getX(), mapTileIdentifier.getY()),
+                        x + 10, y + 20);
+                g.drawString(String.format("LX: %.2f", getEnvelope().getLowerCorner().getOrdinate(0)),
+                        x + 10, y + 40);
+                g.drawString(String.format("LY: %.2f", getEnvelope().getLowerCorner().getOrdinate(1)),
+                        x + 10, y + 50);
+                g.drawString(String.format("UX: %.2f", getEnvelope().getUpperCorner().getOrdinate(0)),
+                        x + 10, y + 70);
+                g.drawString(String.format("UY: %.2f", getEnvelope().getUpperCorner().getOrdinate(1)),
+                        x + 10, y + 80);
             } else {
                 throw new IllegalArgumentException("Unsupported context: " + context);
             }

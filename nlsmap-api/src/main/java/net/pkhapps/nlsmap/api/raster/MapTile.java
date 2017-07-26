@@ -18,7 +18,7 @@ public interface MapTile {
     Envelope getEnvelope();
 
     /**
-     * TODO Document me
+     * TODO Redesign to make the painting separate from the actual tile
      *
      * @return
      */

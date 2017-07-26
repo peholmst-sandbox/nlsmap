@@ -3,7 +3,6 @@ package net.pkhapps.nlsmap.ui.swing;
 import net.pkhapps.nlsmap.api.CoordinateReferenceSystems;
 import net.pkhapps.nlsmap.api.raster.MapTileIdentifier;
 import net.pkhapps.nlsmap.api.raster.MapTileProvider;
-import net.pkhapps.nlsmap.ui.MockMapTileProvider;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.Envelope2D;
 import org.opengis.geometry.DirectPosition;
@@ -13,7 +12,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseMotionListener;
 import java.util.Optional;
 
@@ -167,7 +165,7 @@ public class MapPanel extends JComponent {
     }
 
     private MapTileProvider mapTileProvider;
-    private int zoomLevel;
+    private int zoomLevel = 0;
     // Initial anchorPointPosition is a roundabout in my home town :-)
     private DirectPosition anchorPointPosition = new DirectPosition2D(CoordinateReferenceSystems.ETRS89_TM35FIN,
             240474.500, 6694820.500);
@@ -200,7 +198,9 @@ public class MapPanel extends JComponent {
         mapTileProvider.getTile(tileIdentifier).ifPresent(tile -> {
             final Point bottomLeft = getAnchorPoint().toPoint(getAnchorPointPosition(), getBounds(), getScaleX(),
                     getScaleY(), tile.getEnvelope().getLowerCorner());
-            tile.paint(g, bottomLeft.x, bottomLeft.y - tile.getHeight());
+            if (bottomLeft.x + tile.getWidth() > 0 && bottomLeft.y > 0) {
+                tile.paint(g, bottomLeft.x, bottomLeft.y - tile.getHeight());
+            } // No need to paint something that is outside the clipping area
         });
     }
 
@@ -287,48 +287,23 @@ public class MapPanel extends JComponent {
         return zoomLevel;
     }
 
+    /**
+     * TODO Document me
+     */
+    public void setZoomLevel(int zoomLevel) {
+        if (zoomLevel != this.zoomLevel) {
+            MapTileProvider mapTileProvider = requireMapTileProvider();
+            if (zoomLevel < mapTileProvider.getMinZoomLevel() || zoomLevel > mapTileProvider.getMaxZoomLevel()) {
+                throw new IllegalArgumentException("Illegal zoom level");
+            }
+            this.zoomLevel = zoomLevel;
+            // TODO Check if we need to do something else as well
+            repaint();
+        }
+    }
+
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(300, 300);
-    }
-
-    public static void main(String[] args) throws Exception {
-        UIManager.setLookAndFeel(
-                UIManager.getCrossPlatformLookAndFeelClassName());
-        SwingUtilities.invokeLater(() -> {
-            final JFrame frame = new JFrame("MapPanel Demo");
-            frame.setLayout(new BorderLayout());
-            final MapPanel panel = new MapPanel();
-            final JLabel statusBar = new JLabel();
-            panel.setMapTileProvider(new MockMapTileProvider());
-
-            final Runnable updateStatusBar = () -> statusBar.setText(
-                    String.format("Mouse cursor coordinates: %s, anchor point coordinates: %s, anchor point: %s",
-                            panel.getMousePositionCoordinates().map(MapPanel::directPositionToString).orElse("(none)"),
-                            directPositionToString(panel.getAnchorPointPosition()), panel.getAnchorPoint()));
-
-            panel.addPropertyChangeListener(evt -> updateStatusBar.run());
-            panel.addMouseMotionListener(new MouseMotionAdapter() {
-                @Override
-                public void mouseMoved(MouseEvent e) {
-                    updateStatusBar.run();
-                }
-            });
-            frame.add(panel, BorderLayout.CENTER);
-            frame.add(statusBar, BorderLayout.SOUTH);
-            updateStatusBar.run();
-            frame.pack();
-            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            frame.setVisible(true);
-        });
-    }
-
-    private static String directPositionToString(DirectPosition directPosition) {
-        if (directPosition == null) {
-            return null;
-        } else {
-            return String.format("%s,%s", directPosition.getOrdinate(0),
-                    directPosition.getOrdinate(1));
-        }
     }
 }

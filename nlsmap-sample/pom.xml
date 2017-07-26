@@ -9,8 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>nlsmap-importer</artifactId>
-    <name>NLS Map Importer Application</name>
+    <artifactId>nlsmap-sample</artifactId>
 
     <dependencies>
         <dependency>
@@ -19,16 +18,15 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <groupId>net.pkhapps.nlsmap</groupId>
+            <artifactId>nlsmap-ui</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-image</artifactId>
+            <optional>true</optional>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 </project>
