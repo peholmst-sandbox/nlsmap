@@ -7,8 +7,10 @@ import net.pkhapps.nlsmap.api.CoordinateReferenceSystems;
 import net.pkhapps.nlsmap.api.raster.MapTile;
 import net.pkhapps.nlsmap.api.raster.MapTileIdentifier;
 import net.pkhapps.nlsmap.api.raster.MapTileProvider;
+import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.JTS;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.h2gis.utilities.SFSUtilities;
 import org.h2gis.utilities.SpatialResultSet;
 import org.opengis.geometry.Envelope;
@@ -28,15 +30,17 @@ import java.util.*;
 import java.util.function.Supplier;
 
 /**
- * TODO Document me
+ * TODO Document me. NOT THREAD SAFE!
  */
 public class H2gisMapTileProvider implements MapTileProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(H2gisMapTileProvider.class);
     private final Supplier<Connection> connectionSupplier;
     private final Cache<MapTileIdentifier, MapTile> tileCache = CacheBuilder.newBuilder()
-            .maximumSize(200)
+            .maximumSize(200) // TODO Make cache size configurable
             .build();
+    private final Map<H2gisZoomLevel, Envelope> lastQueriedEnvelopes = new HashMap<>();
+    private final Map<H2gisZoomLevel, Collection<MapTileIdentifier>> lastQueryResults = new HashMap<>();
 
     /**
      * @param connectionSupplier
@@ -82,11 +86,22 @@ public class H2gisMapTileProvider implements MapTileProvider {
 
     @Override
     public Collection<MapTileIdentifier> getTileIdentifiers(int zoomLevel, Envelope envelope) {
-        final String tableName = H2gisZoomLevel.findByZoomLevel(zoomLevel).getTableName();
-        LOGGER.debug("Looking for tiles inside envelope [{}] in table [{}]", envelope, tableName);
+        final H2gisZoomLevel zl = H2gisZoomLevel.findByZoomLevel(zoomLevel);
+        // Start by checking the cache
+        if (isEnvelopeWithinLastQueriedEnvelope(zl, envelope)) {
+            LOGGER.debug("Found needed tile identifiers in cache for envelope [{}] on zoom level {}", envelope,
+                    zoomLevel);
+            Collection<MapTileIdentifier> cachedResult = lastQueryResults.get(zl);
+            if (cachedResult != null) {
+                return new HashSet<>(cachedResult);
+            }
+        }
+        // Then, check the database
+        final String tableName = zl.getTableName();
+        LOGGER.debug("Querying for tiles inside envelope [{}] on zoom level {}", envelope, zoomLevel);
         // Using the max/min columns is faster than using the geom column because of indexing limitations.
-        try (PreparedStatement stmnt = getConnection().prepareStatement("SELECT DISTINCT a.id FROM " + tableName +
-                " a WHERE (a.min_x >= ? AND a.max_x <= ? AND a.min_y >= ? AND a.max_y <= ?)")) {
+        try (PreparedStatement stmnt = getConnection().prepareStatement("SELECT DISTINCT id, min_x, min_y, max_x, max_y " +
+                "FROM " + tableName + " WHERE (min_x >= ? AND max_x <= ? AND min_y >= ? AND max_y <= ?)")) {
             // TODO Cache prepared statement somewhere
             // TODO Take coordinate system axis into account instead of assuming 0 is X and 1 is Y
 
@@ -105,19 +120,37 @@ public class H2gisMapTileProvider implements MapTileProvider {
             stmnt.setDouble(parameterIx++, maxX);
             stmnt.setDouble(parameterIx++, minY);
             stmnt.setDouble(parameterIx, maxY);
-/*
-            stmnt.setDouble(5, minX);
-            stmnt.setDouble(6, minY);
-            stmnt.setDouble(7, maxX);
-            stmnt.setDouble(8, maxY);*/
+
+            // We need to collect these for the cache
+            double actualMinX = Double.MAX_VALUE;
+            double actualMinY = Double.MAX_VALUE;
+            double actualMaxX = Double.MIN_VALUE;
+            double actualMaxY = Double.MIN_VALUE;
 
             try (ResultSet resultSet = stmnt.executeQuery()) {
                 Set<MapTileIdentifier> identifiers = new HashSet<>();
                 while (resultSet.next()) {
                     identifiers.add(new H2gisMapTileIdentifier(resultSet.getString(1), zoomLevel));
+                    actualMinX = Math.min(actualMinX, resultSet.getDouble(2));
+                    actualMinY = Math.min(actualMinY, resultSet.getDouble(3));
+                    actualMaxX = Math.max(actualMaxX, resultSet.getDouble(4));
+                    actualMaxY = Math.max(actualMaxY, resultSet.getDouble(5));
                 }
-                LOGGER.debug("Found {} tile(s) on in table [{}] inside envelope [{}]", identifiers.size(), tableName,
+                LOGGER.debug("Found {} tile(s) on zoom level {} inside envelope [{}]", identifiers.size(), zoomLevel,
                         envelope);
+
+                // Cache results
+                if (identifiers.size() > 0) {
+                    lastQueryResults.put(zl, new HashSet<>(identifiers));
+                    lastQueriedEnvelopes.put(zl, new Envelope2D(
+                            new DirectPosition2D(envelope.getCoordinateReferenceSystem(), actualMinX, actualMinY),
+                            new DirectPosition2D(envelope.getCoordinateReferenceSystem(), actualMaxX, actualMaxY)));
+                } else {
+                    // We don't want to keep invalid data in the cache
+                    lastQueryResults.remove(zl);
+                    lastQueriedEnvelopes.remove(zl);
+                }
+
                 return identifiers;
             }
         } catch (Exception ex) {
@@ -126,12 +159,21 @@ public class H2gisMapTileProvider implements MapTileProvider {
         return Collections.emptyList();
     }
 
+    private boolean isEnvelopeWithinLastQueriedEnvelope(H2gisZoomLevel zoomLevel, Envelope envelope) {
+        Envelope lastQueriedEnvelope = lastQueriedEnvelopes.get(zoomLevel);
+        if (lastQueriedEnvelope == null) {
+            return false;
+        }
+        ReferencedEnvelope lastQueriedReferencedEnvelope = new ReferencedEnvelope(lastQueriedEnvelope);
+        return lastQueriedReferencedEnvelope.contains(envelope.getLowerCorner()) &&
+                lastQueriedReferencedEnvelope.contains(envelope.getUpperCorner());
+    }
+
     @Override
     public Optional<MapTile> getTile(MapTileIdentifier tileIdentifier) {
         MapTile tile = tileCache.getIfPresent(tileIdentifier);
         if (tile == null && tileIdentifier instanceof H2gisMapTileIdentifier) {
             final String tableName = H2gisZoomLevel.findByZoomLevel(tileIdentifier.getZoomLevel()).getTableName();
-            // TODO Add local cache
             try (PreparedStatement stmnt = getConnection().prepareStatement("SELECT a.image, a.geom FROM " + tableName + " a WHERE a.id = ?")) {
                 stmnt.setString(1, ((H2gisMapTileIdentifier) tileIdentifier).id);
                 try (SpatialResultSet resultSet = stmnt.executeQuery().unwrap(SpatialResultSet.class)) {
