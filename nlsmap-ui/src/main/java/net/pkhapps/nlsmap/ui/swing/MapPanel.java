@@ -13,10 +13,13 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
- * TODO document me
+ * TODO document me. NOT THREAD SAFE
  */
 public class MapPanel extends JComponent {
 
@@ -170,6 +173,7 @@ public class MapPanel extends JComponent {
     private DirectPosition anchorPointPosition = new DirectPosition2D(CoordinateReferenceSystems.ETRS89_TM35FIN,
             240474.500, 6694820.500);
     private AnchorPoint anchorPoint = CENTER;
+    private final List<MapPanelLayer> layers = new ArrayList<>();
 
     /**
      * Default constructor for the {@code MapPanel}. Remember to set a
@@ -187,10 +191,14 @@ public class MapPanel extends JComponent {
         if (mapTileProvider == null) {
             g.drawString("Please attach a MapTileProvider", 10, 20);
         } else {
+            // TODO Cache background and layers as images, so that we don't need to repaint everything
+            // Draw the background
             g.setColor(Color.GRAY);
             g.fillRect(0, 0, getBounds().width, getBounds().height);
             mapTileProvider.getTileIdentifiers(zoomLevel, getEnvelope()).forEach(tileIdentifier ->
                     drawTile(tileIdentifier, g));
+            // Draw the layers
+            layers.stream().filter(MapPanelLayer::isVisible).forEach(l -> l.paint(g));
         }
     }
 
@@ -257,6 +265,15 @@ public class MapPanel extends JComponent {
     /**
      * TODO Document me
      */
+    public DirectPosition getCoordinates(Point point) {
+        Objects.requireNonNull(point, "point must not be null");
+        return getAnchorPoint().toDirectPosition(getAnchorPointPosition(), getBounds(), getScaleX(), getScaleY(),
+                point);
+    }
+
+    /**
+     * TODO Document me
+     */
     public Optional<MapTileProvider> getMapTileProvider() {
         return Optional.ofNullable(mapTileProvider);
     }
@@ -269,7 +286,6 @@ public class MapPanel extends JComponent {
         if (mapTileProvider != null) {
             zoomLevel = mapTileProvider.getMinZoomLevel();
         }
-        // TODO Check if we need to do something else as well
         repaint();
     }
 
@@ -297,7 +313,6 @@ public class MapPanel extends JComponent {
                 throw new IllegalArgumentException("Illegal zoom level");
             }
             this.zoomLevel = zoomLevel;
-            // TODO Check if we need to do something else as well
             repaint();
         }
     }
@@ -306,4 +321,37 @@ public class MapPanel extends JComponent {
     public Dimension getPreferredSize() {
         return new Dimension(300, 300);
     }
+
+    /**
+     * TODO Document me
+     */
+    public void addLayer(MapPanelLayer layer) {
+        Objects.requireNonNull(layer, "layer must not be null");
+        if (layer.isAttached()) {
+            throw new IllegalArgumentException("Layer is already attached to a MapPanel");
+        }
+        layer.attach(this);
+        layers.add(layer);
+        repaint();
+    }
+
+    /**
+     * TODO Document me
+     */
+    public void removeLayer(MapPanelLayer layer) {
+        Objects.requireNonNull(layer, "layer must not be null");
+        if (layers.remove(layer)) {
+            layer.detach();
+            repaint();
+        }
+    }
+
+    /**
+     * TODO Document me
+     */
+    public Iterable<MapPanelLayer> getLayers() {
+        return layers;
+    }
+
+    // TODO Method for reordering layers
 }

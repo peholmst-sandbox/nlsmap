@@ -129,6 +129,9 @@ public class H2gisRasterImporter {
             importer.importRasterFiles(
                     new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_5000"),
                     H2gisZoomLevel.ZL5000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
+
+            // TODO Make another zoom level between 1:5000 and 1:10000 that is based on the 1:5000
+
             importer.importRasterFiles(
                     new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_10000"),
                     H2gisZoomLevel.ZL10000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
