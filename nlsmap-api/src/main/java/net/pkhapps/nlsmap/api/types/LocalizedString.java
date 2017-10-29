@@ -2,6 +2,8 @@ package net.pkhapps.nlsmap.api.types;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -19,6 +21,7 @@ public class LocalizedString implements Serializable {
 
     /**
      * Creates a new
+     *
      * @param values
      */
     @JsonCreator
@@ -75,7 +78,7 @@ public class LocalizedString implements Serializable {
          * @param value
          * @return
          */
-        public Builder withValue(Language language, String value) {
+        public @NotNull Builder withValue(@NotNull Language language, @Nullable String value) {
             Objects.requireNonNull(language, "language must not be null");
             if (value == null) {
                 values.remove(language);
@@ -88,7 +91,7 @@ public class LocalizedString implements Serializable {
         /**
          * @return
          */
-        public LocalizedString build() {
+        public @NotNull LocalizedString build() {
             return new LocalizedString(values);
         }
     }

@@ -27,7 +27,7 @@ public enum Language {
     }
 
     /**
-     * @return
+     * Returns the ISO-639-2 code of the language.
      */
     @JsonValue
     public String getISO639alpha3() {
@@ -35,7 +35,7 @@ public enum Language {
     }
 
     /**
-     * @return
+     * Returns the locale of the language.
      */
     public Locale getLocale() {
         return new Locale(iso639_2);

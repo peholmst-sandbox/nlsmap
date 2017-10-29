@@ -50,10 +50,19 @@ class MunicipalitiesTab extends BorderPane {
         MunicipalityImportTask task = new MunicipalityImportTask(connection);
         StringBuffer statusBuilder = new StringBuffer();
         task.messageProperty().addListener((v, oldValue, newValue) -> {
-            statusBuilder.append(newValue).append("\n");
-            status.set(statusBuilder.toString());
+            if (newValue != null) {
+                statusBuilder.append(newValue).append("\n");
+                status.set(statusBuilder.toString());
+            }
         });
         status.set("");
+        task.exceptionProperty().addListener((v, oldValue, newValue) -> {
+            if (newValue != null) {
+                statusBuilder.append("Error: ");
+                statusBuilder.append(newValue.getMessage());
+                status.set(statusBuilder.toString());
+            }
+        });
         running.bind(task.runningProperty());
         new Thread(task).start();
     }

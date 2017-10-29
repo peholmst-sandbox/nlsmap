@@ -24,11 +24,10 @@ public class MunicipalityImportTask extends Task<Void> {
 
     private static final String DROP_DDL = "DROP TABLE IF EXISTS municipality";
     private static final String CREATE_DDL = "CREATE TABLE municipality (" +
-                                             "id INTEGER NOT NULL PRIMARY KEY," +
+                                             "code INTEGER NOT NULL PRIMARY KEY," +
                                              "name_fi VARCHAR(255) NOT NULL," +
-                                             "name_sv VARCHAR(255) NOT NULL," +
-                                             "name_en VARCHAR(255) NOT NULL)";
-    private static final String INSERT_DML = "INSERT INTO municipality (id,name_fi,name_sv,name_en) VALUES (?,?,?,?)";
+                                             "name_sv VARCHAR(255) NOT NULL)";
+    private static final String INSERT_DML = "INSERT INTO municipality (code,name_fi,name_sv) VALUES (?,?,?)";
 
     private final ObjectProperty<Connection> connection;
 
@@ -49,7 +48,7 @@ public class MunicipalityImportTask extends Task<Void> {
 
         AtomicInteger count = new AtomicInteger();
         try (PreparedStatement insertStatement = connection.prepareStatement(INSERT_DML)) {
-            updateMessage("Reading  data from " + SOURCE);
+            updateMessage("Reading data from " + SOURCE);
             XMLInputFactory inputFactory = XMLInputFactory.newFactory();
             try (InputStream is = new URL(SOURCE).openStream()) {
                 XMLStreamReader reader = inputFactory.createXMLStreamReader(is);
@@ -72,7 +71,6 @@ public class MunicipalityImportTask extends Task<Void> {
         int id = Integer.parseInt(reader.getAttributeValue(null, "value"));
         String nameFi = "";
         String nameSv = "";
-        String nameEn = "";
         while (reader.hasNext()) {
             int eventType = reader.next();
             if (eventType == START_ELEMENT && reader.getLocalName().equals("documentation")) {
@@ -82,14 +80,11 @@ public class MunicipalityImportTask extends Task<Void> {
                     nameFi = value;
                 } else if ("swe".equals(lang)) {
                     nameSv = value;
-                } else if ("eng".equals(lang)) {
-                    nameEn = value;
                 }
             } else if (eventType == END_ELEMENT && reader.getLocalName().equals("enumeration")) {
                 insertStatement.setInt(1, id);
                 insertStatement.setString(2, nameFi);
                 insertStatement.setString(3, nameSv);
-                insertStatement.setString(4, nameEn);
                 insertStatement.executeUpdate();
                 count.incrementAndGet();
                 return;
