@@ -127,28 +127,28 @@ public class H2gisRasterImporter {
             H2gisDatabaseInitializer.initialize(conn);
             H2gisRasterImporter importer = new H2gisRasterImporter(conn);
             importer.importRasterFiles(
-                    new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_5000"),
+                    new File("/Users/peholmst/Google Drive/Maps/taustakartta_1_5000"),
                     H2gisZoomLevel.ZL5000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
 
             // TODO Make another zoom level between 1:5000 and 1:10000 that is based on the 1:5000
 
             importer.importRasterFiles(
-                    new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_10000"),
+                    new File("/Users/peholmst/Google Drive/Maps/taustakartta_1_10000"),
                     H2gisZoomLevel.ZL10000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
             importer.importRasterFiles(
-                    new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_20000"),
+                    new File("/Users/peholmst/Google Drive/Maps/taustakartta_1_20000"),
                     H2gisZoomLevel.ZL20000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
             importer.importRasterFiles(
-                    new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_40000"),
+                    new File("/Users/peholmst/Google Drive/Maps/taustakartta_1_40000"),
                     H2gisZoomLevel.ZL40000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
             importer.importRasterFiles(
-                    new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_80000"),
+                    new File("/Users/peholmst/Google Drive/Maps/taustakartta_1_80000"),
                     H2gisZoomLevel.ZL80000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
             importer.importRasterFiles(
-                    new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_160000"),
+                    new File("/Users/peholmst/Google Drive/Maps/taustakartta_1_160000"),
                     H2gisZoomLevel.ZL160000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
             importer.importRasterFiles(
-                    new File("/Users/petterprivate/Google Drive/Maps/taustakartta_1_320000"),
+                    new File("/Users/peholmst/Google Drive/Maps/taustakartta_1_320000"),
                     H2gisZoomLevel.ZL320000, CoordinateReferenceSystems.ETRS89_TM35FIN_SRID);
         }
     }
