@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>nlsmap-api</artifactId>
+    <name>NLS Map API Library</name>
 
     <dependencies>
         <dependency>

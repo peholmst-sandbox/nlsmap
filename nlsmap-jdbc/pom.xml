@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>nlsmap-jdbc</artifactId>
+    <name>NLS Map JDBC Implementation Library</name>
 
     <dependencies>
         <dependency>

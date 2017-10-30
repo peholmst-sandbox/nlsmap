@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>nlsmap-ui</artifactId>
+    <name>NLS Map UI Components</name>
 
     <dependencies>
         <dependency>

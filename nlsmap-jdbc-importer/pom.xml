@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>nlsmap-importer</artifactId>
-    <name>NLS Map Importer Application</name>
+    <artifactId>nlsmap-jdbc-importer</artifactId>
+    <name>NLS Map JDBC Importer Application</name>
 
     <dependencies>
         <dependency>
