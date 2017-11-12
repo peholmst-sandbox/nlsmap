@@ -45,4 +45,8 @@ public class MunicipalityFieldDemo extends Application {
     public void stop() throws Exception {
         connectionSupplier.close();
     }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
 }

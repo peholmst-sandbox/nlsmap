@@ -163,4 +163,8 @@ public class ImporterApp extends Application {
             this.connected.set(false);
         }
     }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
 }
