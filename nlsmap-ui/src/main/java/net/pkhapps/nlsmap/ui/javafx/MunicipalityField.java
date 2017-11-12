@@ -4,6 +4,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.*;
+import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Control;
@@ -14,6 +15,8 @@ import net.pkhapps.nlsmap.api.types.Language;
 import net.pkhapps.nlsmap.api.types.SearchMode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -24,6 +27,8 @@ import java.util.List;
  * @see MunicipalityQuery#findByName(String, SearchMode)
  */
 public class MunicipalityField extends Control {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MunicipalityField.class);
 
     private final ObjectProperty<MunicipalityQuery> municipalityQuery = new SimpleObjectProperty<>();
     private final ObjectProperty<StringConverter<Municipality>> converter = new SimpleObjectProperty<>();
@@ -54,19 +59,17 @@ public class MunicipalityField extends Control {
     private final StringProperty searchTerm = new SimpleStringProperty();
     private final ObjectBinding<ObservableList<Municipality>> searchResultBinding =
             Bindings.createObjectBinding(this::computeSearchResults, searchTerm, municipalityQuery);
-    private final ReadOnlyListWrapper<Municipality> searchResult = new ReadOnlyListWrapper<>();
+    private final ReadOnlyListWrapper<Municipality> searchResultProperty = new ReadOnlyListWrapper<>();
     private final ObjectProperty<Municipality> value = new SimpleObjectProperty<>();
     private final StringBinding valueStringBinding =
             Bindings.createStringBinding(this::computeValueString, value, converter);
-    private final ReadOnlyStringWrapper valueString = new ReadOnlyStringWrapper();
 
     /**
      * Creates a new {@code MunicipalityField}.
      */
     public MunicipalityField() {
         getStyleClass().add("municipality-field");
-        searchResult.bind(searchResultBinding);
-        valueString.bind(valueStringBinding);
+        searchResultProperty.bind(searchResultBinding);
     }
 
     private ObservableList<Municipality> computeSearchResults() {
@@ -74,9 +77,11 @@ public class MunicipalityField extends Control {
         MunicipalityQuery municipalityQuery = this.municipalityQuery.get();
 
         if (searchTerm == null || searchTerm.isEmpty() || municipalityQuery == null) {
+            LOGGER.trace("Nothing to search for, returning empty list");
             return FXCollections.unmodifiableObservableList(FXCollections.emptyObservableList());
         } else {
             List<Municipality> result = municipalityQuery.findByName(searchTerm, SearchMode.STARTS_WITH);
+            LOGGER.trace("Invoked query, returning result of {} item(s)", result.size());
             return FXCollections.unmodifiableObservableList(FXCollections.observableList(result));
         }
     }
@@ -142,7 +147,7 @@ public class MunicipalityField extends Control {
      * in the text field. The converter must never return a {@code null} string and does not need to implement the
      * {@link StringConverter#fromString(String)} method. If no converter has been set, a default one will be used.
      *
-     * @see #valueStringProperty()
+     * @see #valueString()
      */
     public final @NotNull ObjectProperty<StringConverter<Municipality>> converterProperty() {
         return converter;
@@ -177,7 +182,7 @@ public class MunicipalityField extends Control {
      * Getter for {@link #searchResultProperty()}.
      */
     public final @NotNull ObservableList<Municipality> getSearchResult() {
-        return searchResult.get();
+        return searchResultBinding.get();
     }
 
     /**
@@ -187,7 +192,7 @@ public class MunicipalityField extends Control {
      * @see MunicipalityQuery#findByName(String, SearchMode)
      */
     public final @NotNull ReadOnlyListProperty<Municipality> searchResultProperty() {
-        return searchResult.getReadOnlyProperty();
+        return searchResultProperty.getReadOnlyProperty();
     }
 
     /**
@@ -212,10 +217,10 @@ public class MunicipalityField extends Control {
     }
 
     /**
-     * Getter for {@link #valueStringProperty()}.
+     * Getter for {@link #valueString()}.
      */
     public final @NotNull String getValueString() {
-        return valueString.get();
+        return valueStringBinding.get();
     }
 
     /**
@@ -224,7 +229,7 @@ public class MunicipalityField extends Control {
      *
      * @see #converterProperty()
      */
-    public final @NotNull ReadOnlyStringProperty valueStringProperty() {
-        return valueString;
+    public final @NotNull ObservableStringValue valueString() {
+        return valueStringBinding;
     }
 }

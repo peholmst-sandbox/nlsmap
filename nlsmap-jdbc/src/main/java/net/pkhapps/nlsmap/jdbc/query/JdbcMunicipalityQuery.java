@@ -111,6 +111,7 @@ public class JdbcMunicipalityQuery implements MunicipalityQuery {
         while (resultSet.next()) {
             municipalities.add(mapMunicipality(resultSet));
         }
+        LOGGER.trace("Result contains {} item(s)", municipalities.size());
         return municipalities;
     }
 

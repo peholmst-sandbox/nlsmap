@@ -1,0 +1,3 @@
+.municipality-field {
+    -fx-skin: "net.pkhapps.nlsmap.ui.javafx.skin.MunicipalityFieldSkin";
+}
