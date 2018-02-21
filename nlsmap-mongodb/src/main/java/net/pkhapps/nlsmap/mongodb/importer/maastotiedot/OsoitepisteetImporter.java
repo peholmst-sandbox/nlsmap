@@ -27,9 +27,9 @@ class OsoitepisteetImporter extends AbstractImporter {
         document.append("_id", new BsonInt64((Long) feature.get("gid")));
 
         appendValueIfNotNull(document, "sijaintitarkkuus", feature);
-        appendValueIfNotNull(document, "korkeustarkkuus", feature);
         appendValueIfNotNull(document, "aineistolahde", feature);
         appendValueIfNotNull(document, "alkupvm", feature);
+        appendValueIfNotNull(document, "loppupvm", feature);
         appendValueIfNotNull(document, "suunta", feature);
         appendValueIfNotNull(document, "sijainti", feature);
         appendValueIfNotNull(document, "kohderyhma", feature);
@@ -37,6 +37,9 @@ class OsoitepisteetImporter extends AbstractImporter {
         appendValueIfNotNull(document, "numero", feature);
         appendValueIfNotNull(document, "nimi_suomi", feature);
         appendValueIfNotNull(document, "nimi_ruotsi", feature);
+        appendValueIfNotNull(document, "nimi_inarinsaame", feature);
+        appendValueIfNotNull(document, "nimi_koltansaame", feature);
+        appendValueIfNotNull(document, "nimi_pohjoissaame", feature);
         appendValueIfNotNull(document, "kuntatunnus", feature);
 
         logger.debug("Created {}", document);

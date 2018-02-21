@@ -2,6 +2,7 @@ package net.pkhapps.nlsmap.mongodb.importer.maastotiedot;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
+import net.pkhapps.nlsmap.mongodb.MongoConstants;
 import org.geotools.gml3.GMLConfiguration;
 import org.geotools.xml.AppSchemaConfiguration;
 import org.geotools.xml.PullParser;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -22,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -67,14 +70,33 @@ public class TerrainDatabaseImporter {
     }
 
     public static void main(String[] args) throws Exception {
-        // TODO Make configurable
-        MongoClient client = new MongoClient();
-        MongoDatabase maastotietokanta = client.getDatabase("maastotietokanta");
+        if (args.length < 2) {
+            System.out.println("Arguments: mongodbHost[:port] dataDirectory");
+        } else {
+            String hostArgument = args[0];
+            String directoryArgument = args[1];
 
-        TerrainDatabaseImporter terrainDatabaseImporter = new TerrainDatabaseImporter(maastotietokanta);
-        terrainDatabaseImporter.importData(new File("C:\\Users\\pette\\OneDrive\\Maps\\maastotietokanta_kaikki_kohteet"));
+            File directory = new File(directoryArgument);
+            if (!directory.exists()) {
+                throw new FileNotFoundException(directoryArgument);
+            }
 
-        client.close();
+            try (MongoClient mongoClient = new MongoClient(hostArgument)) {
+                MongoDatabase maastotietokanta = mongoClient.getDatabase(MongoConstants.TERRAIN_DATABASE);
+
+                // TODO Make it possible to specify whether the collections should be dropped or not
+                // Drop all old collections
+                maastotietokanta.listCollectionNames().forEach((Consumer<String>) name -> {
+                    if (!name.startsWith("system")) {
+                        LOGGER.info("Dropping old collection {}", name);
+                        maastotietokanta.getCollection(name).drop();
+                    }
+                });
+
+                TerrainDatabaseImporter terrainDatabaseImporter = new TerrainDatabaseImporter(maastotietokanta);
+                terrainDatabaseImporter.importData(new File("C:\\Users\\pette\\OneDrive\\Maps\\maastotietokanta_kaikki_kohteet"));
+            }
+        }
     }
 
     private void importData(@NotNull File file) {

@@ -5,20 +5,19 @@ import net.pkhapps.nlsmap.api.types.LocalizedString;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Enumeration of completeness states ("how complete is the road?").
+ * Enumeration of address point classes.
  *
- * @see <a href="http://xml.nls.fi/XML/Schema/Maastotietojarjestelma/MTK/201405/Koodistot/Valmiusaste.xsd">Valmiusaste.xsd</a>
+ * @see <a href="http://xml.nls.fi/XML/Schema/Maastotietojarjestelma/MTK/201405/Koodistot/OsoitepisteSymboliluokka.xsd">OsoitepisteSymboliluokka.xsd</a>
  */
-public enum CompletenessState implements Code<String> {
+public enum AddressPointClass implements Code<String> {
 
-    IN_USE("0", "Käytössä", "I bruk"),
-    UNDER_CONSTRUCTION("1", "Rakenteilla", "Under konstruktion"),
-    IN_PLANNING("3", "Suunnitteilla", "Under planering");
+    ADDRESS("96001", "Lähiosoite", "Näradress"),
+    POINT_OF_ENTRY("96002", "Kulkupaikka", "Passeringspunkt");
 
     final String code;
     final LocalizedString description;
 
-    CompletenessState(String code, String descriptionFin, String descriptionSwe) {
+    AddressPointClass(String code, String descriptionFin, String descriptionSwe) {
         this.code = code;
         this.description = new LocalizedString.Builder()
                 .withValue(Language.FINNISH, descriptionFin)

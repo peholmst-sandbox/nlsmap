@@ -48,6 +48,11 @@ public class LocalizedString implements Serializable {
     }
 
     @Override
+    public String toString() {
+        return String.format("%s[%s]", getClass().getSimpleName(), values);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

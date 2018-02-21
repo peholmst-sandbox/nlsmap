@@ -129,7 +129,7 @@ abstract class AbstractImporter {
         } else if (value instanceof String) {
             return new BsonString((String) value);
         } else if (value instanceof Date) {
-            return new BsonDateTime(((Date) value).getTime());
+            return new BsonDateTime(((Date) value).getTime()); // TODO Timezone? (need to use the same when deserializing)
         } else if (value instanceof Geometry) {
             return convertGeometry((Geometry) value);
         } else if (value instanceof Map) {
@@ -166,7 +166,7 @@ abstract class AbstractImporter {
         value.forEach((mapKey, mapValue) -> {
             if (mapValue != null) {
                 if (mapKey == null) {
-                    document.append("value", convertValue(mapValue));
+                    document.append("value", convertValue(mapValue)); // TODO Make this configurable
                 } else {
                     document.append(mapKey.toString(), convertValue(mapValue));
                 }
