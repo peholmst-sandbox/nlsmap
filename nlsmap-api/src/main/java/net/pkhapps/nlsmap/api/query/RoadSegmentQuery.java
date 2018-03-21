@@ -1,60 +1,23 @@
 package net.pkhapps.nlsmap.api.query;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Point;
-import net.pkhapps.nlsmap.api.codes.Municipality;
 import net.pkhapps.nlsmap.api.features.RoadSegment;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
  * Query interface for querying {@link RoadSegment}s.
  */
-public interface RoadSegmentQuery {
-
-    /**
-     * Finds all road segments that meet the given criteria. If the criteria is empty, no search is performed and
-     * an empty list is returned.
-     */
-    @NotNull List<RoadSegment> findByCriteria(@NotNull Criteria criteria);
-
-    /**
-     * Creates a new {@link CriteriaBuilder} to be used to build {@link Criteria} objects for
-     * {@link #findByCriteria(Criteria)}.
-     */
-    @NotNull CriteriaBuilder newCriteriaBuilder();
+public interface RoadSegmentQuery extends FeatureQuery<RoadSegment, RoadSegmentQuery.RoadSegmentCriteria,
+        RoadSegmentQuery.RoadSegmentCriteriaBuilder> {
 
     /**
      * Interface defining a criteria to use when searching for {@link RoadSegment}s.
      */
-    interface Criteria {
+    interface RoadSegmentCriteria extends Criteria {
 
         /**
-         * The envelope that the road segments must either pass through or start or end in.
-         *
-         * @see RoadSegment#getLocation()
-         */
-        @NotNull Optional<Envelope> getEnvelope();
-
-        /**
-         * A point that the road segments must be close to. The implementation is free to decide how close is close
-         * enough.
-         *
-         * @see RoadSegment#getLocation()
-         */
-        @NotNull Optional<Point> getPoint();
-
-        /**
-         * The municipality that the road segments must belong to.
-         *
-         * @see RoadSegment#getMunicipality()
-         */
-        @NotNull Optional<Municipality> getMunicipality();
-
-        /**
-         * The name or part of the name of the road segments. All languages are checked.
+         * The name or part of the name of the road segments. All languages are checked. Case is insensitive.
          *
          * @see RoadSegment#getName()
          */
@@ -79,45 +42,25 @@ public interface RoadSegmentQuery {
     }
 
     /**
-     * Builder interface for building new {@link Criteria} objects.
+     * Builder interface for building new {@link RoadSegmentCriteria} objects.
      *
      * @see RoadSegmentQuery#newCriteriaBuilder()
      */
-    interface CriteriaBuilder {
+    interface RoadSegmentCriteriaBuilder extends CriteriaBuilder<RoadSegmentCriteria, RoadSegmentCriteriaBuilder> {
 
         /**
-         * @see Criteria#getEnvelope()
+         * @see RoadSegmentCriteria#getName()
          */
-        @NotNull CriteriaBuilder within(@NotNull Envelope envelope);
+        @NotNull RoadSegmentCriteriaBuilder byName(@NotNull String name);
 
         /**
-         * @see Criteria#getPoint()
+         * @see RoadSegmentCriteria#getRoadNumber()
          */
-        @NotNull CriteriaBuilder closeTo(@NotNull Point point);
+        @NotNull RoadSegmentCriteriaBuilder byRoadNumber(@NotNull Integer roadNumber);
 
         /**
-         * @see Criteria#getMunicipality()
+         * @see RoadSegmentCriteria#getAddressNumber()
          */
-        @NotNull CriteriaBuilder within(@NotNull Municipality municipality);
-
-        /**
-         * @see Criteria#getName()
-         */
-        @NotNull CriteriaBuilder byName(@NotNull String name);
-
-        /**
-         * @see Criteria#getRoadNumber()
-         */
-        @NotNull CriteriaBuilder byRoadNumber(@NotNull Integer roadNumber);
-
-        /**
-         * @see Criteria#getAddressNumber()
-         */
-        @NotNull CriteriaBuilder byAddressNumber(@NotNull Integer addressNumber);
-
-        /**
-         * Builds a new {@link Criteria} object.
-         */
-        @NotNull Criteria build();
+        @NotNull RoadSegmentCriteriaBuilder byAddressNumber(@NotNull Integer addressNumber);
     }
 }

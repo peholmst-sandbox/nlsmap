@@ -10,22 +10,18 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Enumeration of map material providers ("where does this data come from?").
+ * Enumeration of road administrators ("who owns/maintains the road?").
  *
- * @see <a href="http://xml.nls.fi/XML/Schema/Maastotietojarjestelma/MTK/201405/Koodistot/Aineistolahde.xsd">Aineistolahde.xsd</a>
+ * @see <a href="http://xml.nls.fi/XML/Schema/Maastotietojarjestelma/MTK/201405/Koodistot/MtjHallinnollinenTieluokka.xsd">MtjHallinnollinenTieluokka.xsd</a>
  */
-public enum MaterialProvider implements Code<String> {
+public enum RoadAdministrator implements Code<String> {
 
-    OTHER("0", "Muu", "Annan"),
-    MML("1", "Maanmittauslaitos", "Lantmäteriverket"),
-    SYKE("2", "Suomen ympäristökeskus", "Finlands miljöcentral"),
-    MKL("3", "Merenkulkulaitos", "Sjöfartsverket"),
-    MH("4", "Metsähallitus", "Forststyrelsen"),
-    PV("5", "Puolustusvoimat", "Försvarsmakten"),
-    MUNICIPALITY("6", "Kunta", "Kommun"),
+    STATE("1", "Valtio", "Stat"),
+    MUNICIPALITY("2", "Kunta", "Kommun"),
+    PRIVATE("3", "Yksityinen", "Enskild"),
     UNKNOWN("", "Tuntematon", "Okänd");
 
-    private static final Map<String, MaterialProvider> codeMap = new HashMap<>();
+    private static final Map<String, RoadAdministrator> codeMap = new HashMap<>();
 
     static {
         Stream.of(values()).forEach(code -> codeMap.put(code.code, code));
@@ -34,7 +30,7 @@ public enum MaterialProvider implements Code<String> {
     final String code;
     final LocalizedString description;
 
-    MaterialProvider(String code, String descriptionFin, String descriptionSwe) {
+    RoadAdministrator(String code, String descriptionFin, String descriptionSwe) {
         this.code = code;
         this.description = LocalizedString.builder()
                 .withValue(Language.FINNISH, descriptionFin)
@@ -43,9 +39,9 @@ public enum MaterialProvider implements Code<String> {
     }
 
     /**
-     * Returns the material provider with the given code.
+     * Returns the road administrator with the given code.
      */
-    public static @NotNull Optional<MaterialProvider> findByCode(@NotNull String code) {
+    public static @NotNull Optional<RoadAdministrator> findByCode(@NotNull String code) {
         return Optional.ofNullable(codeMap.get(code));
     }
 

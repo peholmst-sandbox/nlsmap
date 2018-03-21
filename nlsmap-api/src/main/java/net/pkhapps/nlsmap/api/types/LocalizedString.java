@@ -1,7 +1,5 @@
 package net.pkhapps.nlsmap.api.types;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,39 +10,47 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * TODO document me
+ * Immutable type representing a string with values in many different {@link Language}s. Use the {@link #builder()}
+ * method to create new instances.
  */
-public class LocalizedString implements Serializable {
+public final class LocalizedString implements Serializable {
 
-    @JsonValue
     private final Map<Language, String> values;
 
-    /**
-     * Creates a new
-     *
-     * @param values
-     */
-    @JsonCreator
-    public LocalizedString(Map<Language, String> values) {
+    private LocalizedString(@NotNull Map<Language, String> values) {
         Objects.requireNonNull(values, "values must not be null");
         this.values = new HashMap<>(values);
     }
 
     /**
-     * @param language
-     * @return
+     * Creates and returns a new {@link Builder} for creating new localized strings.
      */
-    public Optional<String> get(Language language) {
+    public static @NotNull Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Returns a representation of the localized string in the given language, if applicable.
+     */
+    public @NotNull Optional<String> get(@NotNull Language language) {
         Objects.requireNonNull(language, "language must not be null");
         return Optional.ofNullable(values.get(language));
     }
 
     /**
-     * @param language
-     * @return
+     * Checks whether the localized string contains a representation for the given language.
      */
-    public boolean containsLanguage(Language language) {
+    public boolean containsLanguage(@NotNull Language language) {
         return get(language).isPresent();
+    }
+
+    /**
+     * Returns whether this localized string contains any representations at all.
+     *
+     * @see #containsLanguage(Language)
+     */
+    public boolean isEmpty() {
+        return values.isEmpty();
     }
 
     @Override
@@ -68,20 +74,25 @@ public class LocalizedString implements Serializable {
 
     @Override
     public int hashCode() {
-        return values.hashCode();
+        return Objects.hash(getClass(), values);
     }
 
     /**
-     *
+     * Builder for creating new {@link LocalizedString}s.
      */
-    public static class Builder {
+    public final static class Builder {
 
         private Map<Language, String> values = new HashMap<>();
 
+        private Builder() {
+        }
+
         /**
-         * @param language
-         * @param value
-         * @return
+         * Adds or removes a representation of the localized string in a specific language.
+         *
+         * @param language the language of the representation.
+         * @param value    the representation of the string in the given language or {@code null} to remove the language.
+         * @return the builder instance, to allow for method chaining.
          */
         public @NotNull Builder withValue(@NotNull Language language, @Nullable String value) {
             Objects.requireNonNull(language, "language must not be null");
@@ -94,7 +105,7 @@ public class LocalizedString implements Serializable {
         }
 
         /**
-         * @return
+         * Creates a new localized string from the values in this builder.
          */
         public @NotNull LocalizedString build() {
             return new LocalizedString(values);

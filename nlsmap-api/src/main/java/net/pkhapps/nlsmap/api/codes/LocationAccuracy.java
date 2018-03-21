@@ -4,6 +4,11 @@ import net.pkhapps.nlsmap.api.types.Language;
 import net.pkhapps.nlsmap.api.types.LocalizedString;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 /**
  * Enumeration of location accuracy classes ("how accurate is the given set of coordinates?").
  *
@@ -31,12 +36,18 @@ public enum LocationAccuracy implements Code<String> {
     MM80000("80000", "80 m"),
     MM100000("10000", "100 m");
 
+    private static final Map<String, LocationAccuracy> codeMap = new HashMap<>();
+
+    static {
+        Stream.of(values()).forEach(code -> codeMap.put(code.code, code));
+    }
+
     final String code;
     final LocalizedString description;
 
     LocationAccuracy(String code, String descriptionFin, String descriptionSwe) {
         this.code = code;
-        this.description = new LocalizedString.Builder()
+        this.description = LocalizedString.builder()
                 .withValue(Language.FINNISH, descriptionFin)
                 .withValue(Language.SWEDISH, descriptionSwe)
                 .build();
@@ -44,6 +55,13 @@ public enum LocationAccuracy implements Code<String> {
 
     LocationAccuracy(String code, String description) {
         this(code, description, description);
+    }
+
+    /**
+     * Returns the location accuracy with the given code.
+     */
+    public static @NotNull Optional<LocationAccuracy> findByCode(@NotNull String code) {
+        return Optional.ofNullable(codeMap.get(code));
     }
 
     @Override

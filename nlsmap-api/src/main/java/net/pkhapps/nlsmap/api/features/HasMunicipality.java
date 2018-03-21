@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Interface for features that belong to a particular {@link Municipality}.
  */
-public interface HasMunicipality {
+public interface HasMunicipality extends Feature {
 
     /**
      * The municipality that the feature belongs to.

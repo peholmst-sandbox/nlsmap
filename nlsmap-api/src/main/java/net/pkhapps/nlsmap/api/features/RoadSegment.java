@@ -1,7 +1,6 @@
 package net.pkhapps.nlsmap.api.features;
 
 import net.pkhapps.nlsmap.api.codes.*;
-import net.pkhapps.nlsmap.api.types.LocalizedString;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -13,7 +12,8 @@ import java.util.Optional;
  *
  * @see AddressPoint
  */
-public interface RoadSegment extends Feature, HasFeatureClass<RoadClass>, HasMunicipality, HasLineStringLocation {
+public interface RoadSegment extends Feature, HasFeatureClass<RoadClass>, HasMunicipality, HasLineStringLocation,
+        HasName {
 
     /**
      * The relative elevation of the segment (e.g. whether the road segment is in a tunnel, on the surface, etc.).
@@ -47,10 +47,10 @@ public interface RoadSegment extends Feature, HasFeatureClass<RoadClass>, HasMun
     @NotNull Optional<Integer> getRoadPartNumber();
 
     /**
-     * The administrative class of the segment (e.g. the party who is in charge of maintaining and
+     * The administrator of the segment (e.g. the party who is in charge of maintaining and
      * administrating the road segment).
      */
-    @NotNull Optional<AdministrativeRoadClass> getAdministrativeClass();
+    @NotNull Optional<RoadAdministrator> getAdministrator();
 
     /**
      * The smallest address number on the left side of the road segment.
@@ -71,9 +71,4 @@ public interface RoadSegment extends Feature, HasFeatureClass<RoadClass>, HasMun
      * The largest address number on the right side of the road segment.
      */
     @NotNull Optional<Integer> getMaxAddressNumberOnTheRight();
-
-    /**
-     * The name of the road that this segment belongs to.
-     */
-    @NotNull Optional<LocalizedString> getName();
 }

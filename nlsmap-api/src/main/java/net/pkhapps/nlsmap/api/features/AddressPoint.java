@@ -1,7 +1,6 @@
 package net.pkhapps.nlsmap.api.features;
 
 import net.pkhapps.nlsmap.api.codes.AddressPointClass;
-import net.pkhapps.nlsmap.api.types.LocalizedString;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -13,15 +12,11 @@ import java.util.Optional;
  *
  * @see RoadSegment
  */
-public interface AddressPoint extends Feature, HasFeatureClass<AddressPointClass>, HasMunicipality, HasPointLocation {
+public interface AddressPoint extends Feature, HasFeatureClass<AddressPointClass>, HasMunicipality, HasPointLocation,
+        HasName {
 
     /**
      * An optional number of the address point (like a street number), can also contain letters.
      */
     @NotNull Optional<String> getNumber();
-
-    /**
-     * The name of the address point (like a street name).
-     */
-    @NotNull LocalizedString getName();
 }

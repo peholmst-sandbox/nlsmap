@@ -56,7 +56,7 @@ public class MunicipalitySchemaTest {
                 Optional<Municipality> municipality = Municipality.findByCode(id);
                 assertThat(municipality).isPresent();
                 assertThat(municipality).map(Municipality::getDescription).hasValue(
-                        new LocalizedString.Builder()
+                        LocalizedString.builder()
                                 .withValue(Language.FINNISH, nameFin)
                                 .withValue(Language.SWEDISH, nameSwe)
                                 .build());

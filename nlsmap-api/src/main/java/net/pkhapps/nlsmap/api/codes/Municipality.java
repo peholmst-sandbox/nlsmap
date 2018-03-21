@@ -16,6 +16,7 @@ import java.util.stream.Stream;
  */
 public enum Municipality implements Code<String> {
 
+    UNKNOWN("", "Tuntematon", "Okänd"),
     ALAJARVI("005", "Alajärvi", "Alajärvi"),
     ALAVIESKA("009", "Alavieska", "Alavieska"),
     ALAVUS("010", "Alavus", "Alavus"),
@@ -328,10 +329,10 @@ public enum Municipality implements Code<String> {
     AHTARI("989", "Ähtäri", "Etseri"),
     AANEKOSKI("992", "Äänekoski", "Äänekoski");
 
-    private static final Map<String, Municipality> codeToMunicipalityMap = new HashMap<>();
+    private static final Map<String, Municipality> codeMap = new HashMap<>();
 
     static {
-        Stream.of(values()).forEach(municipality -> codeToMunicipalityMap.put(municipality.code, municipality));
+        Stream.of(values()).forEach(code -> codeMap.put(code.code, code));
     }
 
     private final String code;
@@ -339,7 +340,7 @@ public enum Municipality implements Code<String> {
 
     Municipality(String code, String nameFin, String nameSwe) {
         this.code = code;
-        this.name = new LocalizedString.Builder()
+        this.name = LocalizedString.builder()
                 .withValue(Language.FINNISH, nameFin)
                 .withValue(Language.SWEDISH, nameSwe)
                 .build();
@@ -349,7 +350,7 @@ public enum Municipality implements Code<String> {
      * Returns the municipality with the given code.
      */
     public static @NotNull Optional<Municipality> findByCode(@NotNull String code) {
-        return Optional.ofNullable(codeToMunicipalityMap.get(code));
+        return Optional.ofNullable(codeMap.get(code));
     }
 
     /**

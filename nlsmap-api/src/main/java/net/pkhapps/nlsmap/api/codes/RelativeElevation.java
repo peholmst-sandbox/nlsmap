@@ -4,6 +4,11 @@ import net.pkhapps.nlsmap.api.types.Language;
 import net.pkhapps.nlsmap.api.types.LocalizedString;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 /**
  * Enumeration of relative elevations ("how high or low is the object in relation to the surface of the earth?").
  *
@@ -21,15 +26,28 @@ public enum RelativeElevation implements Code<String> {
     ABOVE_SURFACE_LEVEL_5("5", "Pinnan yllä taso 5", "Ovanför ytan nivå 5"),
     UNDEFINED("10", "Määrittelemätön", "Odefinierad");
 
+    private static final Map<String, RelativeElevation> codeMap = new HashMap<>();
+
+    static {
+        Stream.of(values()).forEach(code -> codeMap.put(code.code, code));
+    }
+
     final String code;
     final LocalizedString description;
 
     RelativeElevation(String code, String descriptionFin, String descriptionSwe) {
         this.code = code;
-        this.description = new LocalizedString.Builder()
+        this.description = LocalizedString.builder()
                 .withValue(Language.FINNISH, descriptionFin)
                 .withValue(Language.SWEDISH, descriptionSwe)
                 .build();
+    }
+
+    /**
+     * Returns the relative elevation with the given code.
+     */
+    public static @NotNull Optional<RelativeElevation> findByCode(@NotNull String code) {
+        return Optional.ofNullable(codeMap.get(code));
     }
 
     @Override
