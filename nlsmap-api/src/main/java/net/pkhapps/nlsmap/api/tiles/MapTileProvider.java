@@ -1,4 +1,4 @@
-package net.pkhapps.nlsmap.api.raster;
+package net.pkhapps.nlsmap.api.tiles;
 
 import org.opengis.geometry.Envelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -11,6 +11,7 @@ import java.util.Optional;
  *
  * Can assume one provider per panel, to allow for optimization.
  */
+@Deprecated
 public interface MapTileProvider {
 
     int getMaxZoomLevel();
@@ -29,7 +30,7 @@ public interface MapTileProvider {
 
     int getTileHeight(int zoomLevel);
 
-    Collection<MapTileIdentifier> getTileIdentifiers(int zoomLevel, Envelope envelope);
+    Collection<MapTileId> getTileIdentifiers(int zoomLevel, Envelope envelope);
 
-    Optional<MapTile> getTile(MapTileIdentifier tileIdentifier);
+    Optional<MapTile> getTile(MapTileId tileIdentifier);
 }

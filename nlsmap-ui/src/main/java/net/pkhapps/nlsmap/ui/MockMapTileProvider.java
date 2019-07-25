@@ -1,9 +1,9 @@
 package net.pkhapps.nlsmap.ui;
 
 import net.pkhapps.nlsmap.api.CoordinateReferenceSystems;
-import net.pkhapps.nlsmap.api.raster.MapTile;
-import net.pkhapps.nlsmap.api.raster.MapTileIdentifier;
-import net.pkhapps.nlsmap.api.raster.MapTileProvider;
+import net.pkhapps.nlsmap.api.tiles.MapTile;
+import net.pkhapps.nlsmap.api.tiles.MapTileIdentifier;
+import net.pkhapps.nlsmap.api.tiles.MapTileProvider;
 import org.geotools.geometry.Envelope2D;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.geometry.Envelope;

@@ -65,19 +65,6 @@ public class ImporterApp extends Application {
         // Header
         {
             VBox headerLayout = new VBox();
-
-            {
-                HBox header = new HBox();
-                header.setPadding(new Insets(10));
-                header.setSpacing(10);
-                header.getStyleClass().add("app-header");
-                headerLayout.getChildren().add(header);
-
-                Text title = new Text("NLS Map Importer");
-                title.getStyleClass().add("app-header-title");
-                header.getChildren().add(title);
-            }
-
             {
                 HBox fileSelection = new HBox();
                 fileSelection.setPadding(new Insets(10));
@@ -122,7 +109,9 @@ public class ImporterApp extends Application {
         // Tabs
         {
             TabPane tabs = new TabPane();
+            tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
             tabs.getTabs().add(new Tab("Municipalities", new MunicipalitiesTab(connection)));
+            tabs.getTabs().add(new Tab("Terrain Database", new TerrainDatabaseTab(connection)));
             // TODO Add additional importer tabs here
 
             borderPane.setCenter(tabs);

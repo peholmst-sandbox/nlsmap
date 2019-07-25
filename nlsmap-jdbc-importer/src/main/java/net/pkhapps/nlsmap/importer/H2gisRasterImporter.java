@@ -37,7 +37,7 @@ public class H2gisRasterImporter {
     }
 
     public void importRasterFiles(File directory, H2gisZoomLevel zoomLevel, int srid) throws Exception {
-        LOGGER.info("Importing raster files from directory [{}] using zoom level [{}]", directory, zoomLevel);
+        LOGGER.info("Importing tiles files from directory [{}] using zoom level [{}]", directory, zoomLevel);
         try (Worker worker = new Worker(zoomLevel.getTableName(), srid)) {
             // TODO Skip tiles that have already been imported based on the timestamp
             // TODO Verify scales and tile sizes of ZoomLevel with the ones coming from the files

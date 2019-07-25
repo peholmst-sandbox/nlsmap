@@ -107,12 +107,12 @@ public class PostgisRasterImporter {
 
         importTile = connection.prepareStatement("INSERT INTO " + tableName + " (tile_id, rast) VALUES (?, ST_ColorMap(ST_SetValues(ST_AddBand(ST_MakeEmptyRaster(?, ?, ?, ?, ?, ?, ?, ?, ?), '8BUI'::text, 0), 1, 1, 1, ?::double precision[][]), ?))");
 
-        importTileAsWKB = connection.prepareStatement("INSERT INTO " + tableName + " (tile_id, rast) VALUES (?, ?::raster)");
+        importTileAsWKB = connection.prepareStatement("INSERT INTO " + tableName + " (tile_id, rast) VALUES (?, ?::tiles)");
 
         try {
             for (Path path : Files.newDirectoryStream(Paths.get(directory.toURI()), "*.png")) {
                 importFile(path);
-                break; // TODO Remove me once the import is working properly
+                break; // TODO Remove me once the importer is working properly
             }
         } finally {
             importTileAsWKB.close();

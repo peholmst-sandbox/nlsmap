@@ -52,7 +52,7 @@ public class MunicipalityImportTask extends Task<Void> {
             XMLInputFactory inputFactory = XMLInputFactory.newFactory();
             try (InputStream is = new URL(SOURCE).openStream()) {
                 XMLStreamReader reader = inputFactory.createXMLStreamReader(is);
-                updateMessage("Starting import");
+                updateMessage("Starting importer");
                 while (reader.hasNext() && !isCancelled()) {
                     int eventType = reader.next();
                     if (eventType == START_ELEMENT && reader.getLocalName().equals("enumeration")) {

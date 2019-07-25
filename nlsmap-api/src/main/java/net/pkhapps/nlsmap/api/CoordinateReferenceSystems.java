@@ -6,16 +6,12 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * TODO Document me!
- * @deprecated Not sure we need this anymore.
  */
-@Deprecated
 public final class CoordinateReferenceSystems {
 
     public static final int ETRS89_TM35FIN_SRID = 3067;
-    @Deprecated
     public static final int WGS84_SRID = 4326;
     public static final CoordinateReferenceSystem ETRS89_TM35FIN;
-    @Deprecated
     public static final CoordinateReferenceSystem WGS84;
 
     static {

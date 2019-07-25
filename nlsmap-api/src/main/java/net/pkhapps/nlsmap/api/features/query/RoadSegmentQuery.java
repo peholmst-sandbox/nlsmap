@@ -1,4 +1,4 @@
-package net.pkhapps.nlsmap.api.query;
+package net.pkhapps.nlsmap.api.features.query;
 
 import net.pkhapps.nlsmap.api.features.RoadSegment;
 import org.jetbrains.annotations.NotNull;

@@ -1,6 +1,6 @@
 package net.pkhapps.nlsmap.sample;
 
-import net.pkhapps.nlsmap.api.raster.MapTileProvider;
+import net.pkhapps.nlsmap.api.tiles.MapTileProvider;
 import net.pkhapps.nlsmap.jdbc.raster.H2gisMapTileProvider;
 import net.pkhapps.nlsmap.ui.MockMapTileProvider;
 import net.pkhapps.nlsmap.ui.swing.MapPanel;

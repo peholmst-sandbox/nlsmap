@@ -17,7 +17,9 @@ import java.util.stream.Stream;
 public enum RelativeElevation implements Code<String> {
 
     IN_TUNNEL("-11", "Tunnelissa", "I tunnel"),
-    BELOW_SURFACE("-1", "Pinnan alla", "Under ytan"),
+    BELOW_SURFACE_LEVEL_3("-3", "Pinnan alla taso 3", "Under ytan nivå 3"),
+    BELOW_SURFACE_LEVEL_2("-2", "Pinnan alla taso 2", "Under ytan nivå 2"),
+    BELOW_SURFACE_LEVEL_1("-1", "Pinnan alla taso 1", "Under ytan nivå 1"),
     ON_SURFACE("0", "Pinnalla", "På ytan"),
     ABOVE_SURFACE_LEVEL_1("1", "Pinnan yllä taso 1", "Ovanför ytan nivå 1"),
     ABOVE_SURFACE_LEVEL_2("2", "Pinnan yllä taso 2", "Ovanför ytan nivå 2"),

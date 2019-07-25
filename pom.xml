@@ -15,6 +15,7 @@
         <module>nlsmap-ui</module>
         <module>nlsmap-sample</module>
         <module>nlsmap-mongodb</module>
+        <module>nlsmap-javafx</module>
     </modules>
     <packaging>pom</packaging>
 

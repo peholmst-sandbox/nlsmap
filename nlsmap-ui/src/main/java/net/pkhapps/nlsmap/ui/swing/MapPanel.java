@@ -1,8 +1,8 @@
 package net.pkhapps.nlsmap.ui.swing;
 
 import net.pkhapps.nlsmap.api.CoordinateReferenceSystems;
-import net.pkhapps.nlsmap.api.raster.MapTileIdentifier;
-import net.pkhapps.nlsmap.api.raster.MapTileProvider;
+import net.pkhapps.nlsmap.api.tiles.MapTileIdentifier;
+import net.pkhapps.nlsmap.api.tiles.MapTileProvider;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.Envelope2D;
 import org.opengis.geometry.DirectPosition;
@@ -61,7 +61,7 @@ public class MapPanel extends JComponent {
             final double offsetY = point.getY() - centerY;
             // TODO Take axises of CRS into account
 
-            // Here, we are translating from raster to map coordinates, so we use the scale values directly.
+            // Here, we are translating from tiles to map coordinates, so we use the scale values directly.
             final double coordinateX = anchorPointPosition.getOrdinate(0) + scaleX * offsetX;
             final double coordinateY = anchorPointPosition.getOrdinate(1) + scaleY * offsetY;
             return new DirectPosition2D(anchorPointPosition.getCoordinateReferenceSystem(), coordinateX, coordinateY);
@@ -85,8 +85,8 @@ public class MapPanel extends JComponent {
             final double centerX = bounds.getWidth() / 2;
             final double centerY = bounds.getHeight() / 2;
 
-            // We are not translating from raster to map coordinates, so we should use the absolute value of the scale.
-            // The Y scale is most likely negative since (0,0) in the raster plane is in the top-left corner whereas
+            // We are not translating from tiles to map coordinates, so we should use the absolute value of the scale.
+            // The Y scale is most likely negative since (0,0) in the tiles plane is in the top-left corner whereas
             // (0,0) on a map is in the bottom-left corner.
 
             final double minX = anchorPointPosition.getOrdinate(0) - Math.abs(centerX * scaleX);
@@ -104,7 +104,7 @@ public class MapPanel extends JComponent {
             // TODO Take axises of CRS into account
             final double coordinateOffsetX = position.getOrdinate(0) - anchorPointPosition.getOrdinate(0);
             final double coordinateOffsetY = position.getOrdinate(1) - anchorPointPosition.getOrdinate(1);
-            // Here, we are translating from map to raster coordinates, so we use the scale values directly.
+            // Here, we are translating from map to tiles coordinates, so we use the scale values directly.
             final double x = centerX + coordinateOffsetX / scaleX;
             final double y = centerY + coordinateOffsetY / scaleY;
             return new Point((int) x, (int) y);

@@ -3,6 +3,7 @@ package net.pkhapps.nlsmap.importer.ui;
 import javafx.beans.property.*;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -31,9 +32,11 @@ class MunicipalitiesTab extends BorderPane {
         header.setPadding(new Insets(0, 0, 10, 0));
         setTop(header);
 
-        header.getChildren().add(new Text(
-                "This importer will download the list of municipalities from the NLS web service and import it into " +
-                "the database."));
+        Label infoLabel = new Label(
+                "This importer will download the list of municipalities from the NLS web service and importer it into " +
+                        "the database.");
+        infoLabel.setWrapText(true);
+        header.getChildren().add(infoLabel);
 
         Button downloadAndImport = new Button("Download and Import");
         downloadAndImport.setOnAction(event -> start());

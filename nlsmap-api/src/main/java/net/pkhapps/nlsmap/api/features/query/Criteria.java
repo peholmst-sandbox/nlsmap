@@ -1,4 +1,4 @@
-package net.pkhapps.nlsmap.api.query;
+package net.pkhapps.nlsmap.api.features.query;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;

@@ -1,4 +1,4 @@
-package net.pkhapps.nlsmap.importer;
+package net.pkhapps.nlsmap.mongodb.importer.taustakartta;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
@@ -19,7 +19,7 @@ import java.nio.file.Path;
 /**
  * TODO Document me!
  */
-public final class TileUtils {
+final class TileUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TileUtils.class.getName());
 
@@ -34,7 +34,7 @@ public final class TileUtils {
      * @param consumer
      * @throws IOException
      */
-    public static void createTiles(Path path, int tileWidth, int tileHeight, TileConsumer consumer) throws IOException {
+    static void createTiles(Path path, int tileWidth, int tileHeight, TileConsumer consumer) throws IOException {
         final File file = path.toFile();
         LOGGER.info("Reading tiles from [{}]", file);
         final AbstractGridFormat format = GridFormatFinder.findFormat(file);
@@ -89,7 +89,7 @@ public final class TileUtils {
      *
      */
     @FunctionalInterface
-    public interface TileConsumer {
+    interface TileConsumer {
 
         void consume(String name, int x, int y, Raster tile, ColorModel colorModel, Envelope2D envelope) throws IOException;
     }

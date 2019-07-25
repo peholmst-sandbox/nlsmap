@@ -1,7 +1,7 @@
 package net.pkhapps.nlsmap.jdbc.query;
 
 import net.pkhapps.nlsmap.api.codes.Municipality;
-import net.pkhapps.nlsmap.api.query.MunicipalityQuery;
+import net.pkhapps.nlsmap.api.features.query.MunicipalityQuery;
 import net.pkhapps.nlsmap.api.types.Language;
 import net.pkhapps.nlsmap.api.types.LocalizedString;
 import net.pkhapps.nlsmap.api.types.SearchMode;
